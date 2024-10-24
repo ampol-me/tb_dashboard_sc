@@ -1,15 +1,15 @@
 const { app, BrowserWindow, ipcMain } = require('electron');
-const { exec } = require('child_process');
 const path = require('path');
+const exec = require('child_process').exec;
+const robot = require('robotjs');  // สำหรับ Windows
 
-// สร้างหน้าต่างหลักของแอป
 function createWindow() {
     const win = new BrowserWindow({
         width: 700,
-        height: 100,
+        height: 200,
         webPreferences: {
             preload: path.join(__dirname, 'renderer.js'),
-            nodeIntegration: true, // เปิดใช้งาน nodeIntegration สำหรับการใช้ Node.js API ใน renderer
+            nodeIntegration: true,
             contextIsolation: false
         }
     });
@@ -17,7 +17,6 @@ function createWindow() {
     win.loadFile('index.html');
 }
 
-// เริ่มต้นแอป
 app.whenReady().then(createWindow);
 
 app.on('window-all-closed', () => {
@@ -26,26 +25,22 @@ app.on('window-all-closed', () => {
     }
 });
 
-// รับ event จาก renderer สำหรับการกด CMD + TAB
-// ipcMain.on('cmd-tab', () => {
-//     exec(`osascript -e 'tell application "System Events" to keystroke "a" using {command down}'`, (error, stdout, stderr) => {
-//         if (error) {
-//             console.error(`Error executing CMD + A: ${error}`);
-//             return;
-//         }
-//         console.log('CMD + A command sent.');
-//     });
-// });
-
 // รับ event สำหรับคีย์ลัด Ctrl + 1 ถึง Ctrl + 6
 ipcMain.on('ctrl-shortcut', (event, number) => {
     if (number >= 1 && number <= 6) {
-        exec(`osascript -e 'tell application "System Events" to key code ${number + 17} using {control down}'`, (error, stdout, stderr) => {
-            if (error) {
-                console.error(`Error executing Ctrl + ${number}: ${error}`);
-                return;
-            }
-            console.log(`Ctrl + ${number} command sent.`);
-        });
+        if (process.platform === 'darwin') {
+            // สำหรับ macOS ใช้ osascript
+            exec(`osascript -e 'tell application "System Events" to key code ${number + 17} using {control down}'`, (error, stdout, stderr) => {
+                if (error) {
+                    console.error(`Error executing Ctrl + ${number} on macOS: ${error}`);
+                    return;
+                }
+                console.log(`Ctrl + ${number} command sent on macOS.`);
+            });
+        } else if (process.platform === 'win32') {
+            // สำหรับ Windows ใช้ robotjs
+            robot.keyTap(number.toString(), 'control');
+            console.log(`Ctrl + ${number} command sent on Windows.`);
+        }
     }
 });
