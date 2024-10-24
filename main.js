@@ -1,11 +1,11 @@
 const { app, BrowserWindow, ipcMain } = require('electron');
 const path = require('path');
+const { keyboard, Key, Modifier } = require('@nut-tree-fork/nut-js');  // ใช้ nut.js แทน robotjs
 const exec = require('child_process').exec;
-const robot = require('robotjs');  // สำหรับ Windows
 
 function createWindow() {
     const win = new BrowserWindow({
-        width: 700,
+        width: 900,
         height: 200,
         webPreferences: {
             preload: path.join(__dirname, 'renderer.js'),
@@ -26,7 +26,7 @@ app.on('window-all-closed', () => {
 });
 
 // รับ event สำหรับคีย์ลัด Ctrl + 1 ถึง Ctrl + 6
-ipcMain.on('ctrl-shortcut', (event, number) => {
+ipcMain.on('ctrl-shortcut', async (event, number) => {
     if (number >= 1 && number <= 6) {
         if (process.platform === 'darwin') {
             // สำหรับ macOS ใช้ osascript
@@ -38,9 +38,14 @@ ipcMain.on('ctrl-shortcut', (event, number) => {
                 console.log(`Ctrl + ${number} command sent on macOS.`);
             });
         } else if (process.platform === 'win32') {
-            // สำหรับ Windows ใช้ robotjs
-            robot.keyTap(number.toString(), 'control');
-            console.log(`Ctrl + ${number} command sent on Windows.`);
+            // สำหรับ Windows ใช้ nut.js แทน robotjs
+            try {
+                await keyboard.pressKey(Modifier.CTRL, Key[number.toString()]);
+                await keyboard.releaseKey(Modifier.CTRL, Key[number.toString()]);
+                console.log(`Ctrl + ${number} command sent on Windows.`);
+            } catch (error) {
+                console.error(`Error executing Ctrl + ${number} on Windows: ${error}`);
+            }
         }
     }
 });

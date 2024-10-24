@@ -31,6 +31,12 @@ body {
     transition: background-color 0.3s;
 }
 
+.key small {
+
+    font-size: 12px;
+
+}
+
 .key:hover {
     background-color: #ddd;
 }
