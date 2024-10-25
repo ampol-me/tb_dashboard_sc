@@ -28,7 +28,6 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@nut-tree-fork/nut-js": "^4.2.2",
     "express": "^4.21.1"
   },
   "devDependencies": {

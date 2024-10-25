@@ -1,7 +1,24 @@
-const { app, BrowserWindow, ipcMain } = require('electron');
+const { app, BrowserWindow, ipcMain, net } = require('electron');
 const path = require('path');
-const { keyboard, Key, Modifier } = require('@nut-tree-fork/nut-js');  // ใช้ nut.js แทน robotjs
 const exec = require('child_process').exec;
+const { error } = require('console');
+const { stdout, stderr } = require('process');
+
+
+function sendCtrlShortcut(number){
+    const powershellCMD = `
+            $wshell = New-Object -ComObject wscript.shell;
+            $wshell.SendKeys("^{${number}}");
+    `;
+
+    exec(`powershell -command "${powershellCMD}"` , (error, stdout, stderr) => {
+        if (error) {
+            console.error(`Error executing Ctrl + ${number} : ${error.message}`);
+            return;
+        }
+        console.log(`Ctrl + ${number} command sent on Windows.`);
+    });
+}
 
 function createWindow() {
     const win = new BrowserWindow({
@@ -39,22 +56,24 @@ ipcMain.on('ctrl-shortcut', async (event, number) => {
                 console.log(`Ctrl + ${number} command sent on macOS.`);
             });
         } else if (process.platform === 'win32') {
+
+            sendCtrlShortcut(number);
             // สำหรับ Windows ใช้ nut.js แทน robotjs
-            try {
-                // กดปุ่ม Ctrl ค้างไว้
-                await keyboard.pressKey(Modifier.CTRL);
+            // try {
+            //     // กดปุ่ม Ctrl ค้างไว้
+            //     await keyboard.pressKey(Modifier.CTRL);
 
-                // กดปุ่มหมายเลขตามมา
-                await keyboard.pressKey(Key[number.toString()]);
-                await keyboard.releaseKey(Key[number.toString()]);
+            //     // กดปุ่มหมายเลขตามมา
+            //     await keyboard.pressKey(Key[number.toString()]);
+            //     await keyboard.releaseKey(Key[number.toString()]);
 
-                // ปล่อยปุ่ม Ctrl
-                await keyboard.releaseKey(Modifier.CTRL);
+            //     // ปล่อยปุ่ม Ctrl
+            //     await keyboard.releaseKey(Modifier.CTRL);
 
-                console.log(`Ctrl + ${number} command sent on Windows.`);
-            } catch (error) {
-                console.error(`Error executing Ctrl + ${number} on Windows: ${error}`);
-            }
+            //     console.log(`Ctrl + ${number} command sent on Windows.`);
+            // } catch (error) {
+            //     console.error(`Error executing Ctrl + ${number} on Windows: ${error}`);
+            // }
         }
     }
 });
