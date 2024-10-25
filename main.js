@@ -1,4 +1,4 @@
-const { app, BrowserWindow, ipcMain, net } = require('electron');
+const { app, BrowserWindow, ipcMain, net, Menu } = require('electron');
 const path = require('path');
 const exec = require('child_process').exec;
 const { error } = require('console');
@@ -38,6 +38,11 @@ function createWindow() {
     const win = new BrowserWindow({
         width: 900,
         height: 200,
+        alwaysOnTop : true,
+        frame: false,
+        transparent: true,
+        autoHideMenuBar : true,
+        
         webPreferences: {
             preload: path.join(__dirname, 'renderer.js'),
             nodeIntegration: true,
@@ -46,6 +51,18 @@ function createWindow() {
     });
 
     win.loadFile('index.html');
+
+    const contextMenu = Menu.buildFromTemplate([
+        { label: 'Refresh', click: () => win.reload() },
+        { label: 'Toggle DevTools', click: () => win.webContents.toggleDevTools() },
+        { type: 'separator' },
+        { label: 'Quit', click: () => app.quit() }
+    ]);
+
+    win.getBackgroundColor('rgba(0,0,0,0)')
+    win.webContents.on('context-menu', () => {
+        contextMenu.popup();
+    })
 }
 
 app.whenReady().then(createWindow);
