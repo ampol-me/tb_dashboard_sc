@@ -1,6 +1,6 @@
 const { app, BrowserWindow, ipcMain } = require('electron');
 const path = require('path');
-const { keyboard, Key, Modifier } = require('@nut-tree-fork/nut-js/nut-js');  // ใช้ nut.js แทน robotjs
+const { keyboard, Key, Modifier } = require('@nut-tree-fork/nut-js');  // ใช้ nut.js แทน robotjs
 const exec = require('child_process').exec;
 
 function createWindow() {
