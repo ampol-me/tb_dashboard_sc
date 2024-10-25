@@ -2,22 +2,36 @@ const { app, BrowserWindow, ipcMain, net } = require('electron');
 const path = require('path');
 const exec = require('child_process').exec;
 const { error } = require('console');
-const { stdout, stderr } = require('process');
+const { spawn } = require('child_process');
+
 
 
 function sendCtrlShortcut(number){
-    const powershellCMD = `
-            $wshell = New-Object -ComObject wscript.shell;
-            $wshell.SendKeys("^{${number}}");
+    const WCMD = `
+    $wshell = New-Object -ComObject wscript.shell;
+    $wshell.SendKeys("^{${number}}");
     `;
 
-    exec(`powershell -command "${powershellCMD}"` , (error, stdout, stderr) => {
-        if (error) {
-            console.error(`Error executing Ctrl + ${number} : ${error.message}`);
-            return;
-        }
-        console.log(`Ctrl + ${number} command sent on Windows.`);
-    });
+//     exec(`powershell -command "${powershellCMD}"` , (error, stdout, stderr) => {
+//         if (error) {
+//             console.error(`Error executing Ctrl + ${number} : ${error.message}`);
+//             return;
+//         }
+//         console.log(`Ctrl + ${number} command sent on Windows.`);
+//     });
+
+    
+        const ps = spawn('powershell', ['-Command', WCMD]);
+
+        ps.stdout.on('data', (data) => {
+            console.log(`stdout: ${data}`);
+        });
+        ps.stderr.on('data', (data) => {
+            console.error(`stderr: ${data}`);
+        });
+        ps.on('close', (code) => {
+            console.log(`Child process exited with code: ${code}`);
+        });
 }
 
 function createWindow() {
@@ -44,7 +58,7 @@ app.on('window-all-closed', () => {
 
 // รับ event สำหรับคีย์ลัด Ctrl + 1 ถึง Ctrl + 6
 ipcMain.on('ctrl-shortcut', async (event, number) => {
-    if (number >= 1 && number <= 6) {
+    //if (number >= 1 && number <= 6) {
         if (process.platform === 'darwin') {
             // สำหรับ macOS ใช้ osascript
             const keyCode = number + 17;  // key code 18 สำหรับ 1, key code 19 สำหรับ 2, และอื่น ๆ
@@ -75,5 +89,5 @@ ipcMain.on('ctrl-shortcut', async (event, number) => {
             //     console.error(`Error executing Ctrl + ${number} on Windows: ${error}`);
             // }
         }
-    }
+    //}
 });

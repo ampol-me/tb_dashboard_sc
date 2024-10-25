@@ -24,7 +24,9 @@ document.getElementById('ctrl-5').addEventListener('click', () => {
 document.getElementById('ctrl-6').addEventListener('click', () => {
     ipcRenderer.send('ctrl-shortcut', 6);
 });
-
+document.getElementById('ctrl-0').addEventListener('click', () => {
+    ipcRenderer.send('ctrl-shortcut', 0);
+});
 // ฟังก์ชันสำหรับเพิ่มตัวอักษรใน textarea
 // document.addEventListener("DOMContentLoaded", function () {
 //     const keys = document.querySelectorAll(".key");
